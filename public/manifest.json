@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Add Words to List",
+  "version": "0.1.0",
+  "description": "选中单词右键加入生词列表，查看释义并标记已掌握。",
+  "permissions": ["contextMenus", "storage"],
+  "host_permissions": ["https://api.deepseek.com/*"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "打开生词列表"
+  }
+}
