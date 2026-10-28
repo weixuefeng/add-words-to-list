@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSettings, saveSettings } from '../lib/storage';
+import type { RuntimeMessage } from '../lib/types';
 
 export function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
@@ -18,6 +19,12 @@ export function SettingsPage() {
       llmApiKey: apiKey.trim(),
       llmModel: model.trim() || 'deepseek-chat',
     });
+    // 存完 key 顺手把之前没解析成功的词补齐
+    if (apiKey.trim()) {
+      void chrome.runtime
+        .sendMessage({ type: 'parse-pending' } satisfies RuntimeMessage)
+        .catch(() => undefined);
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

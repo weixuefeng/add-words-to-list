@@ -54,6 +54,8 @@ type Word = {
   example?: string;
   hits: number;          // 被添加的次数，重复添加只加 1 不新建条目
   status: 'new' | 'known';
+  parseState?: 'pending' | 'done' | 'failed';
+  parseError?: string;   // no-key | auth | network | bad-response
   createdAt: number;
   lastSeenAt: number;
   knownAt?: number;
@@ -70,6 +72,16 @@ type Word = {
 不用 `chrome.storage.sync`（512 条 / 100KB 配额不够）。写操作走 `src/lib/storage.ts` 里的串行队列，避免并发覆盖。
 
 API key 只存 `storage.local`，不写进代码、不进仓库、不进日志、不进 `storage.sync`。
+
+## 释义解析
+
+`src/lib/llm.ts` 调 DeepSeek `chat/completions`（`response_format: json_object`），返回 `{phonetic, senses, example}`，写回词条。
+
+- 触发点：加词后自动解析；设置页存完 key 自动补解析；列表页「解析 N 个」按钮；详情页「重新解析」
+- 解析在 service worker 里跑，页面关掉也继续。同一词并发请求靠 `inFlight` 集合挡住
+- 结果落库缓存，一个词只请求一次；`parseState === 'done'` 后重新添加也不会再请求
+- 失败只记录错误码，不阻塞入库。错误码到中文的映射集中在 `src/lib/display.ts`
+- 请求超时 20 秒。改 endpoint 或模型时同步改 `host_permissions` 和本节
 
 ## 权限
 
@@ -99,9 +111,9 @@ pnpm check      # typecheck + build，提交前必须通过
 
 ## 当前进度
 
-已实现：右键添加、去重计数、列表（搜索 / 筛选 / 排序）、详情、已掌握切换、设置页存 key。
+已实现：右键添加、去重计数、LLM 自动解析释义、批量补解析、列表（搜索 / 筛选 / 排序）、详情、已掌握切换、设置页存 key。
 
-未实现（下一步）：LLM 解析释义（`src/lib/llm.ts`）、导出 JSON、词形归一（running → run）。
+未实现（下一步）：导出 JSON、词形归一（running → run）、图标资源。
 
 ## 提交规范
 

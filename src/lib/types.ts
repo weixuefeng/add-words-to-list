@@ -1,5 +1,7 @@
 export type WordStatus = 'new' | 'known';
 
+export type ParseState = 'pending' | 'done' | 'failed';
+
 export interface WordSense {
   pos: string;
   defZh: string;
@@ -14,6 +16,8 @@ export interface Word {
   example?: string;
   hits: number;
   status: WordStatus;
+  parseState?: ParseState;
+  parseError?: string;
   createdAt: number;
   lastSeenAt: number;
   knownAt?: number;
@@ -25,3 +29,7 @@ export interface Settings {
   llmApiKey: string;
   llmModel: string;
 }
+
+export type RuntimeMessage =
+  | { type: 'parse-word'; key: string; term: string }
+  | { type: 'parse-pending' };

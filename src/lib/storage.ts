@@ -54,6 +54,19 @@ export function addWord(
   });
 }
 
+export function updateWord(key: string, patch: Partial<Word>): Promise<Word | undefined> {
+  return serialize(async () => {
+    const words = await getWords();
+    const existing = words[key];
+    if (!existing) return undefined;
+
+    const word: Word = { ...existing, ...patch };
+    words[key] = word;
+    await chrome.storage.local.set({ [WORDS_KEY]: words });
+    return word;
+  });
+}
+
 export function setStatus(
   key: string,
   status: WordStatus,

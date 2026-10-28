@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { wordSummary } from '../lib/display';
 import { getWords } from '../lib/storage';
-import type { Word } from '../lib/types';
+import type { RuntimeMessage, Word } from '../lib/types';
 
 type Filter = 'all' | 'new' | 'known';
 
@@ -46,6 +47,13 @@ export function WordListPage() {
   }, [words, filter, keyword]);
 
   const knownCount = words.filter((word) => word.status === 'known').length;
+  const pendingCount = words.filter((word) => word.parseState !== 'done').length;
+
+  const parseAll = () => {
+    void chrome.runtime
+      .sendMessage({ type: 'parse-pending' } satisfies RuntimeMessage)
+      .catch(() => undefined);
+  };
 
   return (
     <div className="page">
@@ -56,9 +64,16 @@ export function WordListPage() {
             未掌握 {words.length - knownCount} · 已掌握 {knownCount}
           </p>
         </div>
-        <a className="link" href="#/settings">
-          设置
-        </a>
+        <div className="header-actions">
+          {pendingCount > 0 ? (
+            <button className="secondary small" type="button" onClick={parseAll}>
+              解析 {pendingCount} 个
+            </button>
+          ) : null}
+          <a className="link" href="#/settings">
+            设置
+          </a>
+        </div>
       </header>
 
       <input
@@ -90,7 +105,7 @@ export function WordListPage() {
           <li key={word.key}>
             <a className="row" href={`#/word/${encodeURIComponent(word.key)}`}>
               <span className="term">{word.term}</span>
-              <span className="def">{word.senses?.[0]?.defZh ?? '尚未解析'}</span>
+              <span className="def">{wordSummary(word)}</span>
               {word.hits > 1 ? <span className="hits">×{word.hits}</span> : null}
               {word.status === 'known' ? <span className="badge">已掌握</span> : null}
             </a>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { parseErrorText } from '../lib/display';
 import { getWords, setStatus } from '../lib/storage';
-import type { Word } from '../lib/types';
+import type { RuntimeMessage, Word } from '../lib/types';
 
 export function WordDetailPage({ wordKey }: { wordKey: string }) {
   const [word, setWord] = useState<Word | null>(null);
@@ -53,6 +54,14 @@ export function WordDetailPage({ wordKey }: { wordKey: string }) {
     setPending(false);
   };
 
+  const reparse = () => {
+    void chrome.runtime
+      .sendMessage({ type: 'parse-word', key: word.key, term: word.term } satisfies RuntimeMessage)
+      .catch(() => undefined);
+  };
+
+  const parsing = word.parseState === 'pending';
+
   return (
     <div className="page">
       <header className="header">
@@ -70,17 +79,22 @@ export function WordDetailPage({ wordKey }: { wordKey: string }) {
 
         {word.senses?.length ? (
           <ul className="senses">
-            {word.senses.map((sense) => (
-              <li key={`${sense.pos}-${sense.defZh}`}>
+            {word.senses.map((sense, index) => (
+              <li key={`${index}-${sense.defZh}`}>
                 {sense.pos ? <span className="pos">{sense.pos}</span> : null}
                 {sense.defZh}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="notice">
-            释义还没解析。下一步接入大模型后，这里会显示音标、词性和中文释义。
-          </p>
+          <div className="parse-box">
+            <p className="notice">{parseNotice(word)}</p>
+            {parsing ? null : (
+              <button className="secondary" type="button" onClick={reparse}>
+                重新解析
+              </button>
+            )}
+          </div>
         )}
 
         {word.example ? <p className="example">{word.example}</p> : null}
@@ -106,6 +120,12 @@ export function WordDetailPage({ wordKey }: { wordKey: string }) {
       </section>
     </div>
   );
+}
+
+function parseNotice(word: Word): string {
+  if (word.parseState === 'pending') return '正在解析…';
+  if (word.parseState === 'failed') return `解析失败：${parseErrorText(word.parseError)}`;
+  return '这个词还没有释义。';
 }
 
 function formatDate(timestamp: number): string {

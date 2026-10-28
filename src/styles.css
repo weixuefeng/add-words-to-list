@@ -298,10 +298,44 @@ a {
 }
 
 .notice {
-  margin: 0 0 20px;
+  margin: 0 0 16px;
   padding: 10px 12px;
   border-radius: 8px;
   background: #f7f9fc;
   color: var(--muted);
   font-size: 13px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.secondary {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.secondary:hover {
+  border-color: #d5d9df;
+  background: #fafbfc;
+}
+
+.secondary.small {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.parse-box {
+  margin-bottom: 16px;
+}
+
+.parse-box .notice {
+  margin-bottom: 10px;
 }
