@@ -60,8 +60,6 @@ export function WordDetailPage({ wordKey }: { wordKey: string }) {
       .catch(() => undefined);
   };
 
-  const parsing = word.parseState === 'pending';
-
   return (
     <div className="page">
       <header className="header">
@@ -89,11 +87,9 @@ export function WordDetailPage({ wordKey }: { wordKey: string }) {
         ) : (
           <div className="parse-box">
             <p className="notice">{parseNotice(word)}</p>
-            {parsing ? null : (
-              <button className="secondary" type="button" onClick={reparse}>
-                重新解析
-              </button>
-            )}
+            <button className="secondary" type="button" onClick={reparse}>
+              重新解析
+            </button>
           </div>
         )}
 
