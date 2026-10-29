@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { DEFAULT_LLM_MODEL } from '../lib/constants';
 import { getSettings, saveSettings } from '../lib/storage';
 import type { RuntimeMessage } from '../lib/types';
 
 export function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState('deepseek-chat');
+  const [model, setModel] = useState(DEFAULT_LLM_MODEL);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -17,7 +18,7 @@ export function SettingsPage() {
   const onSave = async () => {
     await saveSettings({
       llmApiKey: apiKey.trim(),
-      llmModel: model.trim() || 'deepseek-chat',
+      llmModel: model.trim() || DEFAULT_LLM_MODEL,
     });
     // 存完 key 顺手把之前没解析成功的词补齐
     if (apiKey.trim()) {

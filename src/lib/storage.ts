@@ -1,3 +1,4 @@
+import { DEFAULT_LLM_MODEL } from './constants';
 import { wordKey } from './normalize';
 import type { Settings, Word, WordMap, WordStatus } from './types';
 
@@ -6,7 +7,7 @@ const SETTINGS_KEY = 'settings';
 
 const DEFAULT_SETTINGS: Settings = {
   llmApiKey: '',
-  llmModel: 'deepseek-chat',
+  llmModel: DEFAULT_LLM_MODEL,
 };
 
 /** 串行化写操作，避免两次快速添加互相覆盖。 */

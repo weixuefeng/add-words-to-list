@@ -31,7 +31,7 @@ add-words-to-list/
 ├── public/manifest.json      manifest 唯一来源，改权限前先改 CLAUDE.md
 ├── src/
 │   ├── background/index.ts   菜单注册、图标点击、消息处理。不放业务逻辑
-│   ├── lib/                  纯逻辑：storage / normalize / types。不 import react
+│   ├── lib/                  纯逻辑：storage / llm / display / normalize / constants / types。不 import react
 │   ├── pages/                React 页面与组件
 │   ├── main.tsx              挂载入口
 │   └── styles.css            全局样式
@@ -77,6 +77,7 @@ API key 只存 `storage.local`，不写进代码、不进仓库、不进日志�
 
 `src/lib/llm.ts` 调 DeepSeek `chat/completions`（`response_format: json_object`），返回 `{phonetic, senses, example}`，写回词条。
 
+- 默认模型 `deepseek-flash`（`src/lib/constants.ts`），请求体显式带 `thinking: { type: 'disabled' }`。查词典不需要推理，开着思考模式会慢 2-5 秒、输出 token 翻几倍。改模型名先看官方文档，`deepseek-chat` 已经不在列表里
 - 触发点：加词后自动解析；设置页存完 key 自动补解析；列表页「解析 N 个」按钮；详情页「重新解析」
 - 解析在 service worker 里跑，页面关掉也继续。同一词并发请求靠 `inFlight` 集合挡住
 - 结果落库缓存，一个词只请求一次；`parseState === 'done'` 后重新添加也不会再请求

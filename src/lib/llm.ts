@@ -1,7 +1,7 @@
+import { DEFAULT_LLM_MODEL, LLM_TIMEOUT_MS } from './constants';
 import type { Settings, Word, WordSense } from './types';
 
 const ENDPOINT = 'https://api.deepseek.com/chat/completions';
-const TIMEOUT_MS = 20_000;
 const MAX_SENSES = 6;
 
 export type WordInfo = Pick<Word, 'phonetic' | 'senses' | 'example'>;
@@ -42,15 +42,17 @@ export async function fetchWordInfo(term: string, settings: Settings): Promise<W
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: settings.llmModel || 'deepseek-chat',
+        model: settings.llmModel || DEFAULT_LLM_MODEL,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: buildUserPrompt(term) },
         ],
         temperature: 0.2,
         response_format: { type: 'json_object' },
+        // 查词典不需要推理：开着思考模式会慢 2-5 秒，输出 token 还会翻几倍
+        thinking: { type: 'disabled' },
       }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal: AbortSignal.timeout(LLM_TIMEOUT_MS),
     });
   } catch {
     throw new LlmError('network', '请求失败');
